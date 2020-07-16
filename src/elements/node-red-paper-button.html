@@ -1,0 +1,100 @@
+<dom-module id="node-red-paper-button">
+    <template>
+        <style>
+            :host {
+                display: inline-block;
+                height: 42px;
+            }
+            paper-button {
+                width: 100%;
+                height: 100%;
+                text-transform: none;
+            }
+            i.fa {
+                display: inline-block;
+                padding-right: 3px;
+            }
+        </style>
+        <paper-button id="button" raised$="[[raised]]" disabled$="[[disabled]]">
+            <i></i>
+            [[label]]
+        </paper-button>
+    </template>
+    <script>
+        Polymer({
+            is: 'node-red-paper-button',
+            properties: {
+                label: {
+                    type: String,
+                    value: ''
+                },
+                repeat: {
+                    type: Number,
+                    value: 0
+                },
+                color: {
+                    type: String,
+                    value: '',
+                    observer: '_color'
+                },
+                bgColor: {
+                    type: String,
+                    value: '',
+                    observer: '_bgColor'
+                },
+                icon: {
+                    type: String,
+                    value: '',
+                    observer: '_icon'
+                }
+            },
+            ready: function () {
+                var that = this;
+                var button = this.querySelector('paper-button');
+
+                var interval;
+
+                button.addEventListener('mousedown', start);
+                button.addEventListener('mouseup', end);
+                button.addEventListener('mouseout', end);
+
+                button.addEventListener('click', function () {
+                    if (!that.repeat) that.fire('send');
+                });
+
+                function start() {
+                    if (that.repeat) {
+                        that.fire('send');
+                        if (!interval) {
+                            interval = setInterval(function () {
+                                that.fire('send');
+                            }, that.repeat * 1000)
+                        }
+                    }
+                }
+
+                function end() {
+                    clearInterval(interval);
+                    interval = null;
+                }
+
+            },
+            _color: function () {
+                if (this.color) {
+                    this.querySelector('paper-button').style.color = this.color;
+                }
+            },
+            _bgColor: function () {
+                if (this.bgColor) {
+                    this.querySelector('paper-button').style.backgroundColor = this.bgColor;
+                }
+            },
+            _icon: function () {
+                if (this.icon) {
+                    this.querySelector('i').classList.add('fa');
+                    this.querySelector('i').classList.add('fa-' + this.icon);
+                }
+            }
+        })
+    </script>
+</dom-module>

@@ -1,0 +1,97 @@
+
+<dom-module id="node-red-polymer">
+
+
+    <template>
+        <style>
+            paper-menu {
+                height: 100%;
+                overflow-y: scroll;
+            }
+        </style>
+
+        <app-drawer-layout force-narrow="[[forceNarrow]]">
+            <app-drawer>
+                <paper-menu selected="{{selected}}">
+                    <template is="dom-repeat" items="{{menu}}">
+                        <paper-item data-path="{{item.path}}"><i class$="{{item.icon}}"></i> {{item.title}}</paper-item>
+                    </template>
+                </paper-menu>
+            </app-drawer>
+            <app-header-layout>
+                <app-header fixed="[[fixed]]" reveals="[[reveals]]" effects="waterfall">
+                    <app-toolbar>
+                        <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+                        <div main-title>{{title}}</div>
+                    </app-toolbar>
+                </app-header>
+                <iron-pages selected="{{selected}}">
+                    <content select=".page"></content>
+                </iron-pages>
+            </app-header-layout>
+        </app-drawer-layout>
+
+    </template>
+    <script>
+        Polymer({
+            is: "node-red-polymer",
+            properties: {
+                menu: {
+                    type: Array,
+                    observer: 'select'
+                },
+                selected: {
+                    type: Number,
+                    //value: 0,
+                    notify: true,
+                    reflectToAttribute: true,
+                    observer: 'navigate'
+                },
+                path: {
+                    type: String,
+                    notify: true,
+                    reflectToAttribute: true
+                },
+                title: {
+                    type: String
+                },
+                forceNarrow: {
+                    type: Boolean,
+                    value: false
+                },
+                fixed: {
+                    type: Boolean,
+                    value: false
+                },
+                reveals: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+            navigate: function () {
+                if (typeof this.selected !== 'undefined') location.hash = '#/' + this.menu[this.selected].path;
+                var drawer = this.querySelector('app-drawer');
+                if (drawer.opened && !drawer.persistent) drawer.removeAttribute('opened');
+            },
+            select: function () {
+                var that = this;
+                this.menu.forEach(function (mItem, i) {
+                    if (mItem.path === location.hash.substr(2)) {
+                        that.selected = i;
+                    }
+                });
+            },
+            ready: function () {
+                var that = this;
+                var drawer = this.querySelector('app-drawer');
+                this.querySelector('paper-menu').addEventListener('iron-items-changed', function () {
+                    that.querySelectorAll('paper-item').forEach(function (item) {
+                        item.addEventListener('click', function () {
+                            if (!drawer.persistent) drawer.removeAttribute('opened');
+                        });
+                    });
+                })
+            }
+        });
+    </script>
+</dom-module>

@@ -1,0 +1,83 @@
+<dom-module id="node-red-external">
+    <template>
+        <style>
+            :host {
+                display: inline-block;
+                min-height: 24px;
+            }
+            img {
+                width: 100%;
+            }
+            iframe {
+                border: 0;
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+        <template is="dom-if" if="{{_isImg(srcType)}}">
+            <div id="external">
+                <img src="{{srcUrl}}">
+            </div>
+        </template>
+        <template is="dom-if" if="{{_isIframe(srcType)}}">
+            <div id="external">
+                <iframe src="{{srcUrl}}"></iframe>
+            </div>
+        </template>
+    </template>
+    <script>
+        Polymer({
+            is: 'node-red-external',
+            properties: {
+                srcUrl: {
+                    type: String
+                },
+                srcType: {
+                    type: String,
+                    value: 'img'
+                },
+                srcInterval: {
+                    type: String
+                }
+            },
+            ready: function () {
+                var elem;
+                var that = this;
+
+                setTimeout(function () {
+                    var container = that.querySelector('#external');
+                    switch (that.srcType) {
+                        case 'img':
+                            elem = that.querySelector('img');
+                            break;
+                        case 'iframe':
+                            elem = that.querySelector('iframe');
+                            break;
+                    }
+                    if (that.srcInterval) {
+                        elem.addEventListener('load', function () {
+                            container.style.height = '';
+                        });
+                        setInterval(function () {
+                            var height = container.offsetHeight;
+                            container.style.height = height + 'px';
+                            elem.src = '';
+                            elem.src = that.srcUrl + (that.srcUrl.indexOf('?') === -1 ? '?' : '&') + 'nocachetimestamp=' + (new Date()).getTime();
+                        }, that.srcInterval * 1000);
+                    }
+
+                }, 0);
+                
+            },
+            _isImg: function (type) {
+                return type === 'img';
+            },
+            _isIframe: function (type) {
+                return type === 'iframe';
+            }
+        })
+    </script>
+
+</dom-module>
